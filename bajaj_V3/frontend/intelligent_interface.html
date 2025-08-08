@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Intelligent Insurance Query Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .capabilities {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .capability {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .main-content {
+            padding: 40px;
+            display: grid;
+            gap: 30px;
+        }
+
+        .upload-section {
+            background: #f8f9ff;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px dashed #ddd;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover, .upload-section.dragover {
+            border-color: #2a5298;
+            background: #f0f4ff;
+        }
+
+        .upload-area {
+            text-align: center;
+            cursor: pointer;
+            padding: 20px;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .document-info {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .document-info.active {
+            display: block;
+        }
+
+        .query-section {
+            background: #f8f9ff;
+            padding: 30px;
+            border-radius: 15px;
+        }
+
+        .query-input {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        .query-input:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .example-queries {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .example-query {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .example-query:hover {
+            background: #2a5298;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(42, 82, 152, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 30px;
+            padding: 30px;
+            border-radius: 15px;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .result-approved {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .result-rejected {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .result-error {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-card h4 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .confusion-matrix {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .confusion-matrix .matrix-code {
+            font-size: 2em;
+            font-weight: bold;
+            font-family: monospace;
+            margin-bottom: 10px;
+        }
+
+        .matrix-explanation {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #2a5298;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        .status-online {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-offline {
+            background: #f44336;
+            color: white;
+        }
+
+        .json-output {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            white-space: pre;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            color: #2a5298;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2a5298, #4CAF50);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .capabilities {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="status-indicator" class="status-indicator status-offline">🔄 Checking server...</div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Intelligent Insurance Query Engine</h1>
+            <p>Advanced AI-powered document analysis with confusion matrix classification</p>
+            <div class="capabilities">
+                <div class="capability">📄 PDF Processing</div>
+                <div class="capability">🧠 NLP Analysis</div>
+                <div class="capability">🔍 Fuzzy Matching</div>
+                <div class="capability">📊 Confusion Matrix</div>
+                <div class="capability">🎯 Semantic Matching</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- File Upload Section -->
+            <div class="upload-section">
+                <h2 class="section-title">📋 Document Processing Module</h2>
+                <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                    <h3>📤 Upload Policy Document</h3>
+                    <p>Click here or drag and drop PDF, DOCX, or TXT files</p>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">Supports: PDF, DOCX, TXT | Max size: 10MB</p>
+                </div>
+                <input type="file" id="file-input" accept=".pdf,.docx,.txt" />
+                
+                <div class="document-info" id="document-info">
+                    <h4>📄 Document Information</h4>
+                    <div id="document-details"></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="upload-progress"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Query Processing Section -->
+            <div class="query-section">
+                <h2 class="section-title">🔍 Query Processing Engine</h2>
+                <textarea 
+                    id="query-input" 
+                    class="query-input" 
+                    placeholder="Enter your insurance query here...
+
+Examples:
+• 28-year-old pregnant woman, prenatal doctor visits and diagnostic tests covered? Policy active since 4 months
+• 45M, heart surgery, standard policy, active for 3 years
+• IVF treatment for 32F, fertility policy, 18 months active
+• Cancer treatment coverage, premium policy, patient age 55"
+                ></textarea>
+                
+                <div class="example-queries">
+                    <div class="example-query" onclick="setQuery('28F, IVF treatment, 2-year policy')">
+                        <strong>🧬 Test Case 1 (RR):</strong><br>
+                        25F, IVF treatment, standard policy
+                    </div>
+                    <div class="example-query" onclick="setQuery('30F, IVF consultation, fertility policy')">
+                        <strong>✅ Test Case 2 (AA):</strong><br>
+                        30F, IVF consultation, fertility policy
+                    </div>
+                    <div class="example-query" onclick="setQuery('45M, heart surgery, standard policy')">
+                        <strong>❌ Test Case 3 (AR):</strong><br>
+                        45M, heart surgery, standard policy
+                    </div>
+                    <div class="example-query" onclick="setQuery('fertility consultation, standard policy')">
+                        <strong>⚠️ Test Case 4 (RA):</strong><br>
+                        fertility consultation, standard policy
+                    </div>
+                </div>
+                
+                <button id="submit-query" class="submit-btn" disabled>🚀 Analyze Coverage</button>
+            </div>
+
+            <!-- Loading Section -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <h3>🧠 Processing query with intelligent analysis...</h3>
+                <p>Extracting entities • Fuzzy matching • Decision classification</p>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="results-section">
+                <div id="results-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        let uploadedFileId = null;
+        let serverOnline = false;
+
+        // Check server status
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                serverOnline = true;
+                const indicator = document.getElementById('status-indicator');
+                indicator.className = 'status-indicator status-online';
+                indicator.textContent = `✅ Server Online - ${data.uploaded_documents} docs loaded`;
+                
+                console.log('📊 Server capabilities:', data.system_capabilities);
+                
+            } catch (error) {
+                serverOnline = false;
+                const indicator = document.getElementById('status-indicator');
+                indicator.className = 'status-indicator status-offline';
+                indicator.textContent = '❌ Server Offline';
+            }
+        }
+
+        // File upload handling
+        document.getElementById('file-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const documentInfo = document.getElementById('document-info');
+            const documentDetails = document.getElementById('document-details');
+            const progressFill = document.getElementById('upload-progress');
+            
+            documentInfo.classList.add('active');
+            
+            // Show upload progress
+            progressFill.style.width = '30%';
+            documentDetails.innerHTML = `
+                <p><strong>📄 File:</strong> ${file.name}</p>
+                <p><strong>📏 Size:</strong> ${Math.round(file.size / 1024)} KB</p>
+                <p><strong>📊 Status:</strong> Uploading...</p>
+            `;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                progressFill.style.width = '60%';
+
+                const response = await fetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                progressFill.style.width = '90%';
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    uploadedFileId = data.file_id;
+                    progressFill.style.width = '100%';
+                    
+                    documentDetails.innerHTML = `
+                        <p><strong>✅ Upload Status:</strong> Success</p>
+                        <p><strong>📄 File:</strong> ${data.filename}</p>
+                        <p><strong>📏 Size:</strong> ${data.size_display}</p>
+                        <p><strong>🔍 Processing Result:</strong></p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Policy Type: ${data.processing_result?.policy_type || 'Standard'}</li>
+                            <li>Inclusions Found: ${data.processing_result?.inclusions_found || 0}</li>
+                            <li>Exclusions Found: ${data.processing_result?.exclusions_found || 0}</li>
+                            <li>Text Length: ${data.processing_result?.text_length || 0} characters</li>
+                        </ul>
+                        <p style="margin-top: 15px;"><strong>🎯 Ready for queries!</strong></p>
+                    `;
+                    
+                    // Enable query submission
+                    document.getElementById('submit-query').disabled = false;
+                    
+                } else {
+                    throw new Error(data.error || 'Upload failed');
+                }
+
+            } catch (error) {
+                progressFill.style.width = '0%';
+                documentDetails.innerHTML = `
+                    <p style="color: red;"><strong>❌ Upload Failed:</strong> ${error.message}</p>
+                    <p>Please try again with a different file.</p>
+                `;
+            }
+        });
+
+        // Query submission
+        document.getElementById('submit-query').addEventListener('click', async () => {
+            const queryText = document.getElementById('query-input').value.trim();
+            if (!queryText) {
+                alert('Please enter a query');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-query');
+            const loading = document.getElementById('loading');
+            const resultsSection = document.getElementById('results-section');
+
+            submitBtn.disabled = true;
+            loading.classList.add('active');
+            resultsSection.classList.remove('active');
+
+            try {
+                const response = await fetch(`${API_BASE}/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: queryText,
+                        file_id: uploadedFileId || ''
+                    })
+                });
+
+                const data = await response.json();
+                
+                loading.classList.remove('active');
+                resultsSection.classList.add('active');
+
+                if (response.ok) {
+                    displayResult(data);
+                } else {
+                    displayError(data.error || 'Query processing failed');
+                }
+                
+            } catch (error) {
+                loading.classList.remove('active');
+                displayError(`Network error: ${error.message}`);
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+
+        function displayResult(data) {
+            const resultsSection = document.getElementById('results-section');
+            const resultsContent = document.getElementById('results-content');
+            
+            const isApproved = data.decision === 'APPROVED';
+            resultsSection.className = `results-section active ${isApproved ? 'result-approved' : 'result-rejected'}`;
+            
+            // Get confusion matrix explanation
+            const matrixExplanations = {
+                'RR': 'True Negative - Correctly Rejected',
+                'RA': 'False Positive - Incorrectly Approved', 
+                'AR': 'False Negative - Incorrectly Rejected',
+                'AA': 'True Positive - Correctly Approved'
+            };
+            
+            resultsContent.innerHTML = `
+                <h2>${isApproved ? '✅ COVERAGE APPROVED' : '❌ COVERAGE REJECTED'}</h2>
+                
+                <div class="result-grid">
+                    <div class="result-card">
+                        <h4>📊 Decision Analysis</h4>
+                        <p><strong>Decision:</strong> ${data.decision}</p>
+                        <p><strong>Confidence:</strong> ${data.confidence}%</p>
+                        ${data.amount > 0 ? `<p><strong>Coverage Amount:</strong> ₹${data.amount.toLocaleString()}</p>` : ''}
+                        
+                        <div class="confusion-matrix">
+                            <div class="matrix-code">${data.confusion_matrix}</div>
+                            <div class="matrix-explanation">
+                                ${matrixExplanations[data.confusion_matrix] || 'Classification Unknown'}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h4>📋 Document Analysis</h4>
+                        <p><strong>Policy Name:</strong> ${data.document_info?.policy_name || 'Unknown'}</p>
+                        <p><strong>Policy Type:</strong> ${data.document_info?.policy_type || 'Standard'}</p>
+                        <p><strong>File Size:</strong> ${data.document_info?.file_size || 'Unknown'}</p>
+                        <p><strong>Coverage Match:</strong> ${data.coverage_match}</p>
+                        <p><strong>Processing:</strong> ${data.processing_details?.inclusions_checked || 0} inclusions, ${data.processing_details?.exclusions_checked || 0} exclusions checked</p>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h4>🔍 Extracted Information</h4>
+                        ${data.extracted_info?.age ? `<p><strong>Age:</strong> ${data.extracted_info.age} years</p>` : ''}
+                        ${data.extracted_info?.gender ? `<p><strong>Gender:</strong> ${data.extracted_info.gender}</p>` : ''}
+                        ${data.extracted_info?.procedure ? `<p><strong>Procedure:</strong> ${data.extracted_info.procedure}</p>` : ''}
+                        ${data.extracted_info?.policy_duration ? `<p><strong>Policy Duration:</strong> ${data.extracted_info.policy_duration}</p>` : ''}
+                        
+                        ${data.processing_details?.waiting_period_check?.waiting_period_applicable ? `
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px;">
+                            <strong>⏱️ Waiting Period:</strong><br>
+                            Required: ${data.processing_details.waiting_period_check.required_waiting_period}<br>
+                            Status: ${data.processing_details.waiting_period_check.waiting_period_met ? '✅ Met' : '❌ Not Met'}
+                        </div>` : ''}
+                    </div>
+                    
+                    <div class="result-card">
+                        <h4>🎯 Matching Details</h4>
+                        <p><strong>Justification:</strong></p>
+                        <p style="margin: 10px 0; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px;">
+                            ${data.justification}
+                        </p>
+                        
+                        ${data.matching_details?.best_match_clause ? `
+                        <p><strong>Best Match:</strong> ${data.matching_details.best_match_clause}</p>
+                        <p><strong>Similarity:</strong> ${data.matching_details.similarity_score}%</p>` : ''}
+                        
+                        ${data.matching_details?.alternative_matches?.length > 0 ? `
+                        <p><strong>Alternative Matches:</strong></p>
+                        <ul style="margin-left: 15px;">
+                            ${data.matching_details.alternative_matches.map(match => 
+                                `<li>${match.clause} (${match.confidence}%)</li>`
+                            ).join('')}
+                        </ul>` : ''}
+                    </div>
+                </div>
+                
+                <div class="json-output">
+                    <strong>📄 Complete JSON Response:</strong>
+${JSON.stringify(data, null, 2)}
+                </div>
+            `;
+        }
+
+        function displayError(error) {
+            const resultsSection = document.getElementById('results-section');
+            const resultsContent = document.getElementById('results-content');
+            
+            resultsSection.className = 'results-section active result-error';
+            
+            resultsContent.innerHTML = `
+                <h2>❌ Processing Error</h2>
+                <div class="result-grid">
+                    <div class="result-card">
+                        <h4>🚨 Error Details</h4>
+                        <p>${error}</p>
+                        
+                        <h4 style="margin-top: 20px;">🔧 Troubleshooting Steps:</h4>
+                        <ul style="margin-left: 15px; margin-top: 10px;">
+                            <li><strong>📄 Document:</strong> Ensure PDF document is uploaded successfully</li>
+                            <li><strong>🔌 Server:</strong> Check if backend server is running</li>
+                            <li><strong>📝 Query:</strong> Enter a valid medical/insurance query</li>
+                            <li><strong>🔄 Refresh:</strong> Try refreshing the page and uploading again</li>
+                        </ul>
+                        
+                        <p style="margin-top: 15px;"><em>This system performs intelligent analysis on your uploaded documents only.</em></p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setQuery(query) {
+            document.getElementById('query-input').value = query;
+        }
+
+        // Drag and drop functionality
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.parentElement.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.parentElement.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.parentElement.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('file-input').files = files;
+                document.getElementById('file-input').dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Initialize
+        checkServerStatus();
+        setInterval(checkServerStatus, 10000); // Check every 10 seconds
+        
+        console.log('🎯 Intelligent Insurance Query Engine initialized');
+        console.log('📊 Confusion Matrix Classifications: RR, RA, AR, AA');
+        console.log('🧠 Advanced NLP and Semantic Matching enabled');
+    </script>
+</body>
+</html>

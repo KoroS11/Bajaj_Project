@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Insurance Query System - Working Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #2a5298;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #2a5298;
+            background: #f8f9ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #2a5298;
+            background: #f0f4ff;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .query-section {
+            background: #f8f9ff;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .query-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .query-input:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result-approved {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result-rejected {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result-error {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-indicator {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .status-online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .example-queries {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .example-query {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .example-query:hover {
+            background: #2a5298;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 AI Insurance Query System</h1>
+            <p>Dynamic PDF document processing with intelligent decision making</p>
+            <div id="server-status" class="status-indicator status-offline">
+                🔄 Checking server status...
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Upload Section -->
+            <div class="section">
+                <h2>📄 Upload Insurance Document</h2>
+                <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                    <div id="upload-content">
+                        <p style="font-size: 1.2em; margin-bottom: 10px;">📁 Drag & drop your PDF here or click to browse</p>
+                        <p style="color: #666;">Supports PDF files up to 50MB</p>
+                    </div>
+                    <input type="file" id="file-input" accept=".pdf">
+                </div>
+                <div id="upload-progress" style="display: none; margin-top: 15px;">
+                    <div style="background: #e9ecef; height: 10px; border-radius: 5px;">
+                        <div id="progress-bar" style="background: #2a5298; height: 100%; border-radius: 5px; width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                    <p id="upload-status" style="margin-top: 5px; text-align: center;"></p>
+                </div>
+            </div>
+
+            <!-- Query Section -->
+            <div class="section">
+                <h2>🔍 Submit Your Query</h2>
+                <div class="query-section">
+                    <textarea id="query-input" class="query-input" placeholder="Enter your insurance query here...
+Example: 'IVF treatment for 30-year-old woman, policy active for 2 years'"></textarea>
+                    <button id="submit-query" class="submit-btn">🚀 Submit Query</button>
+                    
+                    <div style="margin-top: 20px;">
+                        <p><strong>💡 Example Queries:</strong></p>
+                        <div class="example-queries">
+                            <div class="example-query" onclick="setQuery('IVF treatment for 30-year-old woman')">IVF Treatment Query</div>
+                            <div class="example-query" onclick="setQuery('Heart surgery for 45-year-old male')">Cardiac Surgery Query</div>
+                            <div class="example-query" onclick="setQuery('Cancer chemotherapy treatment')">Cancer Treatment Query</div>
+                            <div class="example-query" onclick="setQuery('Emergency surgery after accident')">Emergency Care Query</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Section -->
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Processing your query...</p>
+            </div>
+
+            <!-- Results Section -->
+            <div id="result-section" class="result-section">
+                <h3 id="result-title">📊 Query Result</h3>
+                <div id="result-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        let uploadedFileId = null;
+
+        // Check server status
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                const statusDiv = document.getElementById('server-status');
+                if (response.ok && data.status === 'healthy') {
+                    const docCount = data.uploaded_documents || 0;
+                    const mode = data.server_mode || 'UNKNOWN';
+                    
+                    if (docCount > 0) {
+                        statusDiv.className = 'status-indicator status-online';
+                        statusDiv.innerHTML = `✅ Ready | ${docCount} document(s) loaded | Mode: ${mode}`;
+                    } else {
+                        statusDiv.className = 'status-indicator status-offline';
+                        statusDiv.innerHTML = `⚠️ Upload Required | Please upload PDF policy documents first | Mode: ${mode}`;
+                    }
+                } else {
+                    throw new Error('Server not healthy');
+                }
+            } catch (error) {
+                const statusDiv = document.getElementById('server-status');
+                statusDiv.className = 'status-indicator status-offline';
+                statusDiv.innerHTML = '❌ Server Offline - Please start the backend server';
+            }
+        }
+
+        // File upload handling
+        document.getElementById('file-input').addEventListener('change', handleFileUpload);
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.toLowerCase().endsWith('.pdf')) {
+                alert('Please select a PDF file');
+                return;
+            }
+
+            const uploadContent = document.getElementById('upload-content');
+            const uploadProgress = document.getElementById('upload-progress');
+            
+            uploadContent.innerHTML = `<p>📄 Selected: ${file.name}</p><p>Uploading...</p>`;
+            uploadProgress.style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    uploadedFileId = data.file_id;
+                    uploadContent.innerHTML = `
+                        <p>✅ Upload Successful!</p>
+                        <p><strong>File:</strong> ${data.filename}</p>
+                        <p><strong>Size:</strong> ${(data.size / 1024).toFixed(1)} KB</p>
+                        ${data.processing_result ? `<p><strong>Processed:</strong> ${data.processing_result.inclusions_found || 0} inclusions, ${data.processing_result.exclusions_found || 0} exclusions</p>` : ''}
+                    `;
+                    document.getElementById('progress-bar').style.width = '100%';
+                    document.getElementById('upload-status').textContent = 'Upload complete!';
+                    
+                    // Refresh server status to show updated document count
+                    setTimeout(checkServerStatus, 500);
+                } else {
+                    throw new Error(data.error || 'Upload failed');
+                }
+            } catch (error) {
+                uploadContent.innerHTML = `<p>❌ Upload failed: ${error.message}</p><p>Click to try again</p>`;
+                uploadProgress.style.display = 'none';
+            }
+        }
+
+        // Query submission
+        document.getElementById('submit-query').addEventListener('click', submitQuery);
+
+        async function submitQuery() {
+            const queryText = document.getElementById('query-input').value.trim();
+            if (!queryText) {
+                alert('Please enter a query');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-query');
+            const loading = document.getElementById('loading');
+            const resultSection = document.getElementById('result-section');
+
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            resultSection.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE}/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: queryText,
+                        file_id: uploadedFileId || ''
+                    })
+                });
+
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                resultSection.style.display = 'block';
+
+                if (response.ok) {
+                    displayResult(data);
+                } else {
+                    displayError(data.error || 'Query failed');
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                displayError(`Network error: ${error.message}`);
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        function displayResult(data) {
+            const resultSection = document.getElementById('result-section');
+            const resultContent = document.getElementById('result-content');
+            
+            const isApproved = data.decision === 'APPROVED';
+            resultSection.className = `result-section ${isApproved ? 'result-approved' : 'result-rejected'}`;
+            
+            resultContent.innerHTML = `
+                <div style="display: grid; gap: 15px;">
+                    <div>
+                        <h4>${isApproved ? '✅' : '❌'} Decision: ${data.decision}</h4>
+                        <p><strong>Confidence:</strong> ${data.confidence}%</p>
+                        ${data.amount ? `<p><strong>Coverage Amount:</strong> ₹${data.amount.toLocaleString()}</p>` : ''}
+                    </div>
+                    
+                    <div>
+                        <h4>📋 Reasoning</h4>
+                        <p>${data.justification?.reasoning || data.reason || 'No reasoning provided'}</p>
+                        ${data.justification?.clause_reference ? `<p><strong>Reference:</strong> ${data.justification.clause_reference}</p>` : ''}
+                    </div>
+                    
+                    ${data.entities_extracted ? `
+                    <div>
+                        <h4>🔍 Extracted Information</h4>
+                        <ul>
+                            ${data.entities_extracted.procedure ? `<li><strong>Procedure:</strong> ${data.entities_extracted.procedure}</li>` : ''}
+                            ${data.entities_extracted.age ? `<li><strong>Age:</strong> ${data.entities_extracted.age} years</li>` : ''}
+                            ${data.entities_extracted.gender ? `<li><strong>Gender:</strong> ${data.entities_extracted.gender}</li>` : ''}
+                            ${data.entities_extracted.policy_duration ? `<li><strong>Policy Duration:</strong> ${data.entities_extracted.policy_duration} years</li>` : ''}
+                        </ul>
+                    </div>
+                    ` : ''}
+                    
+                    <div>
+                        <h4>🔧 System Info</h4>
+                        <p><strong>Document Source:</strong> ${data.document_info?.filename || 'Unknown'}</p>
+                        <p><strong>File Size:</strong> ${data.document_info?.file_size ? Math.round(data.document_info.file_size / 1024) + ' KB' : 'Unknown'}</p>
+                        <p><strong>Policy Name:</strong> ${data.document_info?.policy_name || 'Unknown'}</p>
+                        <p><strong>Request ID:</strong> ${data.request_id || 'N/A'}</p>
+                        ${data.fuzzy_matched_terms ? `<p><strong>Matched Terms:</strong> ${data.fuzzy_matched_terms.join(', ')}</p>` : ''}
+                        <p><strong>Processing Details:</strong> ${data.processing_details?.inclusions_checked || 0} inclusions, ${data.processing_details?.exclusions_checked || 0} exclusions checked</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayError(error) {
+            const resultSection = document.getElementById('result-section');
+            const resultContent = document.getElementById('result-content');
+            
+            resultSection.className = 'result-section result-error';
+            resultSection.style.display = 'block';
+            
+            resultContent.innerHTML = `
+                <h4>❌ Error</h4>
+                <p>${error}</p>
+                <p><strong>Troubleshooting:</strong></p>
+                <ul>
+                    <li><strong>📄 Upload Required:</strong> Upload a PDF policy document first</li>
+                    <li><strong>🔌 Server:</strong> Make sure the backend server is running</li>
+                    <li><strong>📝 Query:</strong> Enter a valid medical/insurance query</li>
+                    <li><strong>🔄 Refresh:</strong> Check server status indicator above</li>
+                </ul>
+                <p><em>Note: This system only analyzes YOUR uploaded documents - no mock data used.</em></p>
+            `;
+        }
+
+        function setQuery(query) {
+            document.getElementById('query-input').value = query;
+        }
+
+        // Drag and drop functionality
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('file-input').files = files;
+                handleFileUpload({ target: { files: files } });
+            }
+        });
+
+        // Initialize
+        checkServerStatus();
+        setInterval(checkServerStatus, 30000); // Check every 30 seconds
+    </script>
+</body>
+</html>

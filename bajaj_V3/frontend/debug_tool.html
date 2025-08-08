@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Debug Tool</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #00ff00; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #333; background: #2a2a2a; }
+        .debug-output { background: #000; color: #00ff00; padding: 10px; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        button { padding: 10px; background: #333; color: #00ff00; border: none; cursor: pointer; margin: 5px; }
+        input[type="text"] { background: #333; color: #00ff00; border: 1px solid #555; padding: 8px; width: 300px; }
+        .error { color: #ff6666; }
+        .success { color: #66ff66; }
+    </style>
+</head>
+<body>
+    <h1>🔍 PDF Document Debug Tool</h1>
+    
+    <div class="section">
+        <h2>📊 Server Status</h2>
+        <button onclick="checkServer()">Check Server</button>
+        <div id="server-status"></div>
+    </div>
+    
+    <div class="section">
+        <h2>📋 Uploaded Documents</h2>
+        <button onclick="listDocuments()">List Documents</button>
+        <div id="documents-list"></div>
+    </div>
+    
+    <div class="section">
+        <h2>🔍 Debug Specific Document</h2>
+        <input type="text" id="file-id" placeholder="Enter file ID from above">
+        <button onclick="debugDocument()">Debug Document</button>
+        <div id="document-debug"></div>
+    </div>
+    
+    <div class="section">
+        <h2>🧪 Test Query</h2>
+        <input type="text" id="test-query" placeholder="Enter test query" value="heart surgery">
+        <button onclick="testQuery()">Test Query</button>
+        <div id="query-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        async function checkServer() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                document.getElementById('server-status').innerHTML = `
+                    <div class="success">✅ Server Online</div>
+                    <div class="debug-output">${JSON.stringify(data, null, 2)}</div>
+                `;
+            } catch (error) {
+                document.getElementById('server-status').innerHTML = `
+                    <div class="error">❌ Server Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function listDocuments() {
+            try {
+                const response = await fetch(`${API_BASE}/documents`);
+                const data = await response.json();
+                document.getElementById('documents-list').innerHTML = `
+                    <div class="success">📄 Found ${data.uploaded_documents} documents</div>
+                    <div class="debug-output">${JSON.stringify(data, null, 2)}</div>
+                `;
+            } catch (error) {
+                document.getElementById('documents-list').innerHTML = `
+                    <div class="error">❌ Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function debugDocument() {
+            const fileId = document.getElementById('file-id').value;
+            if (!fileId) {
+                alert('Please enter a file ID');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/debug-document/${fileId}`);
+                const data = await response.json();
+                document.getElementById('document-debug').innerHTML = `
+                    <div class="success">🔍 Document Debug Info</div>
+                    <div class="debug-output">${JSON.stringify(data, null, 2)}</div>
+                `;
+            } catch (error) {
+                document.getElementById('document-debug').innerHTML = `
+                    <div class="error">❌ Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function testQuery() {
+            const query = document.getElementById('test-query').value;
+            if (!query) {
+                alert('Please enter a test query');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query, file_id: '' })
+                });
+                const data = await response.json();
+                
+                const resultClass = response.ok ? 'success' : 'error';
+                document.getElementById('query-result').innerHTML = `
+                    <div class="${resultClass}">Query Result (${response.status})</div>
+                    <div class="debug-output">${JSON.stringify(data, null, 2)}</div>
+                `;
+            } catch (error) {
+                document.getElementById('query-result').innerHTML = `
+                    <div class="error">❌ Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Auto-check server on load
+        window.onload = () => {
+            checkServer();
+            listDocuments();
+        };
+    </script>
+</body>
+</html>

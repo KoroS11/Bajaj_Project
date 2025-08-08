@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Insurance Query System - Enhanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #2a5298;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #2a5298;
+            background: #f8f9ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #2a5298;
+            background: #f0f4ff;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .query-section {
+            background: #f8f9ff;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .query-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .query-input:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result-approved {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result-rejected {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result-error {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-indicator {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .status-online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .example-queries {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .example-query {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .example-query:hover {
+            background: #2a5298;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-file-medical-alt"></i>
+                <h1>Intelligent Document Decision System</h1>
+            </div>
+            <p class="subtitle">AI-Powered Insurance Claims & Policy Decision Engine</p>
+            <div class="feature-badges">
+                <span class="badge">🤖 Smart Entity Extraction</span>
+                <span class="badge">⚖️ Intelligent Decision Making</span>
+                <span class="badge">🎯 Structured Query Processing</span>
+                <span class="badge">� Decision Justification</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Enhanced Upload Section -->
+            <section class="upload-section">
+                <h2><i class="fas fa-cloud-upload-alt"></i> Upload Documents</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <i class="fas fa-file-upload"></i>
+                        <p>Drag & drop your PDF documents here or click to browse</p>
+                        <p class="file-types">Enhanced Support: PDF files up to 150 pages</p>
+                        <input type="file" id="fileInput" accept=".pdf">
+                    </div>
+                </div>
+                
+                <!-- Enhanced Progress Tracking -->
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-header">
+                        <span id="progressText">Processing...</span>
+                        <span id="progressPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-details">
+                        <div class="progress-stage" id="progressStage">Initializing...</div>
+                        <div class="progress-time" id="progressTime"></div>
+                    </div>
+                </div>
+                
+                <div class="uploaded-files" id="uploadedFiles"></div>
+            </section>
+
+            <!-- Enhanced Query Section -->
+            <section class="query-section">
+                <h2><i class="fas fa-search"></i> Intelligent Query Interface</h2>
+                <div class="query-container">
+                    <div class="query-input-area">
+                        <textarea 
+                            id="queryInput" 
+                            placeholder="Ask structured questions for intelligent decisions...&#10;Examples:&#10;• 46-year-old male, knee surgery in Pune, 3-month-old insurance policy&#10;• 32M, heart surgery, Mumbai, 1 year policy active&#10;• 28F, dental treatment, Delhi, 6 months policy duration"
+                            rows="4"
+                        ></textarea>
+                        <div class="query-actions">
+                            <button class="query-btn" id="submitQuery" disabled>
+                                <i class="fas fa-paper-plane"></i> Submit Query
+                            </button>
+                            <button class="query-btn secondary" id="clearQuery">
+                                <i class="fas fa-eraser"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Enhanced Query Examples -->
+                    <div class="query-examples">
+                        <h4>💡 Intelligent Query Examples:</h4>
+                        <div class="example-queries">
+                            <button class="example-btn" onclick="setQuery('46-year-old male, knee surgery in Pune, 3-month-old insurance policy')">
+                                46M, Knee Surgery, 3-month Policy
+                            </button>
+                            <button class="example-btn" onclick="setQuery('32-year-old female, heart surgery in Mumbai, 1 year active policy')">
+                                32F, Heart Surgery, 1-year Policy
+                            </button>
+                            <button class="example-btn" onclick="setQuery('28M, dental treatment, Delhi, 6 months policy duration')">
+                                28M, Dental Treatment, 6-month Policy
+                            </button>
+                            <button class="example-btn" onclick="setQuery('55F, general consultation, Bangalore, 2 year policy')">
+                                55F, Consultation, 2-year Policy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Enhanced Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h2><i class="fas fa-chart-line"></i> Intelligent Analysis Results</h2>
+                
+                <!-- Query Analysis Card -->
+                <div class="result-card analysis-card">
+                    <h3><i class="fas fa-brain"></i> Query Analysis</h3>
+                    <div id="queryAnalysis" class="analysis-content"></div>
+                </div>
+
+                <!-- Conditional Response Card (shown when query needs clarification) -->
+                <div class="result-card conditional-card" id="conditionalCard" style="display: none;">
+                    <h3><i class="fas fa-question-circle"></i> Query Clarification Needed</h3>
+                    <div id="conditionalContent" class="conditional-content"></div>
+                </div>
+
+                <!-- Standard Response Card -->
+                <div class="result-card answer-card" id="answerCard">
+                    <h3><i class="fas fa-lightbulb"></i> Answer</h3>
+                    <div id="answerContent" class="answer-content"></div>
+                </div>
+
+                <!-- Enhanced JSON Response -->
+                <div class="result-card">
+                    <h3><i class="fas fa-code"></i> Structured Response Data</h3>
+                    <div class="json-container">
+                        <div class="json-actions">
+                            <button class="copy-btn" onclick="copyJson()">
+                                <i class="fas fa-copy"></i> Copy JSON
+                            </button>
+                            <button class="download-btn" onclick="downloadJson()">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                        <pre id="jsonResponse" class="json-output"></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Enhanced System Information -->
+            <section class="info-section">
+                <h2><i class="fas fa-info-circle"></i> Enhanced System Capabilities</h2>
+                <div class="capabilities-grid">
+                    <div class="capability-card">
+                        <i class="fas fa-bolt"></i>
+                        <h4>Parallel Processing</h4>
+                        <p>Process large documents (up to 150 pages) using parallel chunk processing for faster results</p>
+                    </div>
+                    <div class="capability-card">
+                        <i class="fas fa-search-plus"></i>
+                        <h4>Intelligent Query Analysis</h4>
+                        <p>Advanced query understanding with intent detection and completeness analysis</p>
+                    </div>
+                    <div class="capability-card">
+                        <i class="fas fa-brain"></i>
+                        <h4>Conditional Responses</h4>
+                        <p>Smart responses that provide multiple interpretations for incomplete queries</p>
+                    </div>
+                    <div class="capability-card">
+                        <i class="fas fa-vector-square"></i>
+                        <h4>Vector Search</h4>
+                        <p>Semantic similarity search using advanced embeddings for better accuracy</p>
+                    </div>
+                    <div class="capability-card">
+                        <i class="fas fa-chart-bar"></i>
+                        <h4>Progress Tracking</h4>
+                        <p>Real-time processing progress with detailed stage information</p>
+                    </div>
+                    <div class="capability-card">
+                        <i class="fas fa-cogs"></i>
+                        <h4>Enhanced Metadata</h4>
+                        <p>Extract and analyze document structure, tables, forms, and content quality</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Enhanced Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2025 Enhanced LLM Document Processing System - Bajaj</p>
+                <p class="version">Version 2.0 | Enhanced with Advanced AI Features</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Enhanced Notification System -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <script src="assets/js/script_enhanced.js"></script>
+    <script>
+        // Health check for backend service
+        fetch('http://localhost:5000/health')
+          .then(r => r.json())
+          .then(data => console.log('Backend response:', data))
+          .catch(err => console.log('Error:', err))
+    </script>
+</body>
+</html>
