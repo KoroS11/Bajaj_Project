@@ -940,7 +940,9 @@ if __name__ == '__main__':
     print("Press Ctrl+C to stop\n")
     
     try:
-        app.run(debug=False, host='127.0.0.1', port=5000, use_reloader=False)
+        import os
+        port = int(os.environ.get("PORT", 5000))
+        app.run(debug=False, host='0.0.0.0', port=port, use_reloader=False)
     except KeyboardInterrupt:
         print("\n👋 Server stopped by user")
     except Exception as e:
