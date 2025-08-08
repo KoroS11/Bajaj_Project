@@ -1,66 +1,12 @@
-import json
-
 def handler(event, context):
-    """
-    Netlify Functions handler for the Bajaj Insurance API
-    """
-    
-    # Handle CORS
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json'
+        },
+        'body': '{"message": "Bajaj API Working!", "status": "success"}'
     }
-    
-    # Handle preflight requests
-    if event.get('httpMethod') == 'OPTIONS':
-        return {
-            'statusCode': 200,
-            'headers': headers,
-            'body': ''
-        }
-    
-    # Main API logic
-    try:
-        # Simple health check endpoint
-        if event.get('path') == '/.netlify/functions/api' or event.get('rawPath') == '/api':
-            return {
-                'statusCode': 200,
-                'headers': headers,
-                'body': json.dumps({
-                    'message': '🎯 Bajaj Insurance API is working!',
-                    'status': 'success',
-                    'features': [
-                        'AI Decision Making',
-                        'PDF Processing',
-                        'Fuzzy Matching',
-                        'Confusion Matrix Classification'
-                    ]
-                })
-            }
-        
-        # Default response
-        return {
-            'statusCode': 200,
-            'headers': headers,
-            'body': json.dumps({
-                'message': 'Welcome to Bajaj Insurance Query Engine API',
-                'endpoints': {
-                    'health': '/.netlify/functions/api',
-                    'status': 'Active'
-                }
-            })
-        }
-        
-    except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers,
-            'body': json.dumps({
-                'error': str(e),
-                'message': 'Internal server error'
-            })
-        }
 import traceback
 import uuid
 import re

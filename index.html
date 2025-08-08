@@ -1,92 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bajaj Insurance Query Engine</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .api-test {
-            background: #ecf0f1;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        button {
-            background: #3498db;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background: #2980b9;
-        }
-        #result {
-            margin-top: 20px;
-            padding: 15px;
-            background: #d5f4e6;
-            border-radius: 5px;
-            display: none;
-        }
-    </style>
+    <title>Bajaj Project</title>
 </head>
 <body>
-    <div class="container">
-        <h1>🎯 Bajaj Insurance Query Engine</h1>
-        <p>Welcome to the Intelligent Insurance Query Engine with AI-powered decision making.</p>
-        
-        <div class="api-test">
-            <h3>Test API Connection</h3>
-            <button onclick="testAPI()">Test API</button>
-            <div id="result"></div>
-        </div>
-        
-        <div class="features">
-            <h3>Features:</h3>
-            <ul>
-                <li>🧠 Advanced AI Decision Making</li>
-                <li>📊 Confusion Matrix Classification</li>
-                <li>🔍 Fuzzy String Matching</li>
-                <li>📄 PDF Document Processing</li>
-                <li>🎯 Semantic Analysis</li>
-            </ul>
-        </div>
-    </div>
-
+    <h1>Bajaj Insurance Query Engine</h1>
+    <p>Your project is deployed successfully!</p>
+    <button onclick="test()">Test API</button>
+    <div id="result"></div>
+    
     <script>
-        async function testAPI() {
-            const resultDiv = document.getElementById('result');
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = 'Testing API...';
-            
+        async function test() {
             try {
                 const response = await fetch('/.netlify/functions/api');
                 const data = await response.json();
-                resultDiv.innerHTML = `<strong>Success!</strong> API Response: ${JSON.stringify(data, null, 2)}`;
-                resultDiv.style.background = '#d5f4e6';
+                document.getElementById('result').innerHTML = JSON.stringify(data);
             } catch (error) {
-                resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
-                resultDiv.style.background = '#f8d7da';
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
             }
         }
     </script>
