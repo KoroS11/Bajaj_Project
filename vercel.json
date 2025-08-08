@@ -1,13 +1,8 @@
 {
-  "functions": {
-    "main_complete_intelligent.py": {
-      "runtime": "python3.9"
-    }
-  },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/main_complete_intelligent.py"
+      "source": "/(.*)",
+      "destination": "/api/index"
     }
   ]
 }
