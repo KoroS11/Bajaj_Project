@@ -938,7 +938,13 @@ if __name__ == '__main__':
     print("📊 Confusion Matrix Classifications: RR, RA, AR, AA")
     print("🧠 Advanced NLP and Semantic Matching Enabled")
     print("Press Ctrl+C to stop\n")
-    
+
+# For Vercel serverless deployment
+def handler(request):
+    return app
+
+# For local development
+if __name__ == '__main__':
     try:
         import os
         port = int(os.environ.get("PORT", 5000))
