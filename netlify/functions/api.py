@@ -1,27 +1,66 @@
-#!/usr/bin/env python3
-"""
-🎯 INTELLIGENT INSURANCE QUERY ENGINE - Netlify Functions
-✅ Complete implementation per critical requirements
-✅ Confusion Matrix Classification (RR, RA, AR, AA)
-✅ Advanced NLP and Fuzzy Matching
-✅ Production-Ready Architecture
-"""
-
 import json
-import os
-import sys
 
-# Netlify Functions handler
 def handler(event, context):
-    from flask import Flask
-    # Import your Flask app setup here
-    # ... (rest of your Flask app code)
+    """
+    Netlify Functions handler for the Bajaj Insurance API
+    """
     
-    # Return response for Netlify
-    return {
-        'statusCode': 200,
-        'body': json.dumps({'message': 'API is working!'})
+    # Handle CORS
+    headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
     }
+    
+    # Handle preflight requests
+    if event.get('httpMethod') == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': ''
+        }
+    
+    # Main API logic
+    try:
+        # Simple health check endpoint
+        if event.get('path') == '/.netlify/functions/api' or event.get('rawPath') == '/api':
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({
+                    'message': '🎯 Bajaj Insurance API is working!',
+                    'status': 'success',
+                    'features': [
+                        'AI Decision Making',
+                        'PDF Processing',
+                        'Fuzzy Matching',
+                        'Confusion Matrix Classification'
+                    ]
+                })
+            }
+        
+        # Default response
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'message': 'Welcome to Bajaj Insurance Query Engine API',
+                'endpoints': {
+                    'health': '/.netlify/functions/api',
+                    'status': 'Active'
+                }
+            })
+        }
+        
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({
+                'error': str(e),
+                'message': 'Internal server error'
+            })
+        }
 import traceback
 import uuid
 import re
